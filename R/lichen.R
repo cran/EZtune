@@ -20,10 +20,10 @@
 #' absence of a type of lichen species, and 32 are characteristics of the
 #' survey site where the data were collected.
 #'
-#' In the original data there were 12 monthly values for each of the
+#' There were 12 monthly values in the original data for each of the
 #' bioclimatic predictors. Principal components analyses suggested that
 #' for each of these predictors 2 principal components explained the vast
-#' majority (95.0%-99.5%) of the total variability. Based on these analyses,
+#' majority (95.0\%-99.5\%) of the total variability. Based on these analyses,
 #' indices were created for each set of bioclimatic predictors. The variables
 #' with the suffix Ave in the variable name are the average of 12 monthly
 #' variables. The variables with the suffix Diff are contrasts between the

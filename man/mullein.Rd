@@ -11,7 +11,7 @@ variables are characteristics of the site where the data were collected.
 In the original data there were 12 monthly values for each of the
 bioclimatic predictors. Principal components analyses suggested that for
 each of these predictors 2 principal components explained the vast
-majority (95.0% - 99.5%) of the total variability. Based on these analyses,
+majority (95.0\% - 99.5\%) of the total variability. Based on these analyses,
 indices were created for each set of bioclimatic predictors. The
 variables with the suffix Ave in the variable name are the average of
 12 monthly variables. The variables with the suffix Diff are contrasts
@@ -64,7 +64,7 @@ mullein
 }
 \description{
 This dataset contains information about the presence and absence of
-common mullein (verbascum thapsus) at Lava Beds National Monument.
+common mullein (Verbascum thapsus) at Lava Beds National Monument.
 The park was digitally divided into 30m by 30m pixels. Park personnel
 provided data on 6,047 sites at which mullein was detected and treated
 between 2000 and 2005, and these data were augmented by 6,047 randomly
@@ -74,6 +74,6 @@ bioclimatic variables such as minimum, maximum, and average temperature,
 precipitation, relative humidity, and evapotranspiration. The dataset
 called mulleinTest is a test dataset collected in Lava Beds National
 Monument in 2006 that can be used to verify evaluate predictive statistical
-procedures done using applied to the mullein dataset.
+procedures applied to the mullein dataset.
 }
 \keyword{datasets}

@@ -4,70 +4,85 @@
 \alias{eztune}
 \title{Supervised Learning Function}
 \usage{
-eztune(x, y, type = "binary", method = "ada", optimizer = "optim",
-  cv = FALSE, fold = 10)
+eztune(x, y, method = "svm", optimizer = "hjn", fast = TRUE,
+  cross = NULL)
 }
 \arguments{
 \item{x}{Matrix or data frame containing the dependent variables.}
 
-\item{y}{Numeric vector of 0s and 1s for the response.}
-
-\item{type}{Type of response (binary is the only option at this time).}
+\item{y}{Vector responses.Can either be a factor or a numeric vector.}
 
 \item{method}{Model to be fit. Choices are "ada" for adaboost, "gbm" for
 gradient boosting machines, and "svm" for support vector machines.}
 
 \item{optimizer}{Optimization method. Options are "ga" to use a genetic
-algorithm to optimize and "optim" to use a quasi-Newton-Raphson optimizer.}
+algorithm and "hjn" to use a Hooke-Jeeves optimizer.}
 
-\item{cv}{Indicates if the cross-validation accuracy should be used to fit.
-FALSE to use resubstitution accuracy to optimize (faster but less accurate)
-and TRUE to use cross-validation accuracy (slower and more accurate).}
+\item{fast}{Indicates if the function should use a subset of the
+observations when optimizing to speed up calculation time. A value
+of TRUE will use the smaller of 50\% of the data or 200 observations
+for model fitting, a number between 0 and 1 specifies the proportion
+of data that will be used to fit the model, and a postive integer
+specifies the number of observations that will be used to fit the
+model. A model is computed using a random selection of data and
+the remaining data are used to validate model performance.
+Validation accuracy or MSE is used as the optimization measure.}
 
-\item{fold}{The number of folds to use for n-fold cross validation. This is
-ignored if cv = FALSE.}
+\item{cross}{If an integer k > 1 is specified, k-fold cross-validation
+is used to fit the model. This method is very slow for large datasets.
+This parameter is ignored unless \code{fast = FALSE}.}
 }
 \value{
 Function returns a summary of the fitted tuning parameters,
- the accuracy, and the best model.
+ the accuracy or MSE, and the best model.
 
-\item{summary}{Matrix that contains the values of the tuning parameters
- and the final accuracy.}
-\item{accuracy}{Best accuracy obtained by optimizing algorithm.}
-\item{best.model}{Model using optimized parameters. Adaboost model
- comes from package ada, gbm model comes from package gbm, svm
- model comes from package e1071.}
+\item{accuracy}{Best accuracy obtained by optimizing algorithm
+for classification models.}
+\item{mse}{Best mean squared error obtained by optimizing algorithm
+for regression models.}
+\item{model}{Model using optimized parameters. Adaboost model
+ comes from package ada (ada object), gbm model comes from package gbm
+ (gbm.object object), svm (svm object) model comes from package e1071.}
+\item{n}{Number of observations used in model training when
+fast option is used}
+\item{nfold}{Number of folds used if cross validation is used
+for optimization.}
+\item{cost}{Tuning parameter for svm.}
+\item{gamma}{Tuning parameter for svm.}
+\item{epsilon}{Tuning parameter for svm regression.}
 \item{iter}{Tuning parameter for adaboost.}
 \item{nu}{Tuning parameter for adaboost.}
-\item{loss}{Loss used in adaboost fitting.}
-\item{interaction.depth}{Tuning parameter for gbm.}
+\item{shrinkage}{Tuning parameter for adaboost and gbm.}
 \item{n.trees}{Tuning parameter for gbm.}
-\item{shrinkage}{Tuning parameter for gbm.}
-\item{cost}{Tuning parameter for svm.}
-\item{epsilon}{Tuning parameter for svm.}
-\item{kernel}{Kernel used in svm fitting.}
+\item{interaction.depth}{Tuning parameter for gbm.}
+\item{n.minobsinnode}{Tuning parameter for gbm.}
 }
 \description{
-eztune is a single function that will tune adaboost, support vector
-machines, and gradient boosting machines. It currently only
-tunes models with a binary response. An optimizer is used to find
-a good set of tuning parameters for the selected model. The
-function optimizes on either the resubstitution accuracy or the
-cross-validated accuracy.
+\code{eztune} is a function that automatically tunes adaboost, support vector
+machines, and gradient boosting machines. An optimization algorithm is
+used to find a good set of tuning parameters for the selected model. The
+function optimizes on a validation dataset, the resubstitution accuracy,
+or the cross validated accuracy.
 }
 \examples{
 library(mlbench)
-data(Glass)
+data(Sonar)
+sonar <- Sonar[sample(1:nrow(Sonar), 100), ]
 
-glass <- Glass[as.numeric(as.character(Glass$Type)) < 3, ]
-glass <- glass[sample(1:nrow(glass), 80), ]
-y <- ifelse(glass$Type == 1, 0, 1)
-x <- glass[, 1:9]
+y <- sonar[, 61]
+x <- sonar[, 1:10]
 
-eztune(x, y, type = "binary", method = "gbm", optimizer = "optim")
+# Optimize an SVM using the default fast setting and Hooke-Jeeves
+eztune(x, y)
+
+# Optimize an SVM with 3-fold cross validation and Hooke-Jeeves
+eztune(x, y, fast = FALSE, cross = 3)
+
+# Optimize GBM using training set of 50 observations and Hooke-Jeeves
+eztune(x, y, method = "gbm", fast = 50)
+
+# Optimize SVM with 25\% of the observations as a training dataset
+# using a genetic algorithm
+eztune(x, y, method = "svm", optimizer = "ga", fast = 0.25)
 
 }
-\keyword{adaboost,}
-\keyword{gbm,}
-\keyword{svm,}
-\keyword{tuning}

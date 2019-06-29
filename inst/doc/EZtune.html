@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Jill F. Lundell" />
+
+<meta name="date" content="2019-06-28" />
+
+<title>EZtune</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' || rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">EZtune</h1>
+<h4 class="author">Jill F. Lundell</h4>
+<h4 class="date">2019-06-28</h4>
+
+
+
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(EZtune)</code></pre></div>
+<p><br /><br /></p>
+<div id="introduction-to-eztune" class="section level1">
+<h1>Introduction to EZtune</h1>
+<p>EZtune is an R package that can automatically tune support vector machines (SVMs), gradient boosting machines (GBMs), and adaboost. The idea for the package came from frustration with trying to tune supervised learning models and finding that available tools are slow and difficult to use, have limited capability, or are not reliably maintained. EZtune was developed to be easy to use off the shelf while providing the user with well tuned models within a reasonable computation time. The primary function in EZtune searches through the hyperparameter space for a model type using either a Hooke-Jeeves or genetic algorithm. Models with a binary or continuous response can be tuned.</p>
+<p>EZtune was developed using research that explored effective hyperparameter spaces for SVM, GBM, and adaboost for data with a continuous response variable or with a binary response variable. Many optimization algorithms were tested to identify ones that were able to find an optimal model with reasonable computation time. The Hooke-Jeeves optimization algorithm out-performed all of the other algorithms in terms of model accuracy and computation time. A genetic algorithm was sometimes able to find a better model than the Hooke-Jeeves optimizatation algorithm, but the computation time is significantly longer. Thus, the genetic algorithm is included as an option, but it is not the default.</p>
+<p>The package includes two functions and four datasets. The functions are eztune and eztune_cv. The datasets are lichen, lichenTest, mullein, and mulleinTest.</p>
+<p><br /><br /></p>
+</div>
+<div id="functions-eztune-and-eztune_cv" class="section level1">
+<h1>Functions: eztune and eztune_cv</h1>
+<p>The eztune function is used to find an optimal model given the data. eztune_cv provides a cross validated accuracy or MSE for the model.</p>
+<div id="eztune" class="section level2">
+<h2>eztune</h2>
+<p>The eztune function is the primary function in the EZtune package. The only required arguments are the predictors and the response variable. The function is built on existing R packages that are well maintained and well programmed to ensure that eztune performance is reliable. SVM models are computed using the e1071 package, GBMs with the gbm package, and adaboost with the ada package. The models produced by eztune are objects from each of these packages so all of the peripheral functions for these packages can be used on models returned by eztune. A summary of each of these packages and why they were chosen follows.</p>
+<div id="support-vector-machines-using-the-e1071-package" class="section level3">
+<h3>Support vector machines using the e1071 package</h3>
+<p>The e1071 package was written by and is maintained by David Meyer. The package was built using the LIBSVM platform, which is written in C++ and is considered one of the best open source libraries for SVMs. e1071 has been around for many years and has continuously been updated during that time frame. It has all of the features needed to perform the tasks needed by eztune and includes other features that allow expansion of eztune in future versions, such as selection of kernels other than the radial kernel and multi-class modeling.</p>
+</div>
+<div id="gradient-boosting-machines-using-the-gbm-package" class="section level3">
+<h3>Gradient boosting machines using the gbm package</h3>
+<p>The gbm package was written by Greg Ridgeway gbm and has been maintained and updated for many years. It performs GBM by using the framework of an adaboost model with an exponential loss function, but uses Friedman’s gradient descent algorithm to optimize the trees rather than the algorithm originally proposed in adaboost. This package was selected because it had all of the features needed for eztune and included the ability to compute a multi-class model for future EZtune versions.</p>
+</div>
+<div id="adaboost-implementation-with-the-ada-package" class="section level3">
+<h3>Adaboost implementation with the ada package</h3>
+<p>In contrast to SVMs and GBMs, there are several standard packages in R that can be used to fit adaboost models. The most established and well known package is ada. Other packages that are often used are fastAdaboost and adabag. fastAdaboost is a new package with a fast implementation of adaboost that is quickly gaining popularity. However, it is still being developed and does not have all of the functionality needed for eztune. It may be considered as a platform for later versions of eztune as fastAdaboost gains more functionality because adaboost is currently the slowest model to tune. The package adabag provides an implementation of adaboost that allows for bagging to be incorporated. This feature is useful, but it does not allow for independent tuning of shrinkage or tree depth. Because these parameters are important tuning parameters, adabag was not considered. The ada package has been maintained and updated consistently for many years and has the capability to tune the number of trees, tree depth, and shrinkage independently. Thus, ada was chosen as the primary adaboost package for eztune.</p>
+</div>
+<div id="implementation-of-eztune" class="section level3">
+<h3>Implementation of eztune</h3>
+<p>The eztune function was designed to be easy to use. It can be used when only data are provided, but arguments can be changed for user flexibility. The default settings were chosen to provide fast implementation of the function with good error rates. The syntax is:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">eztune</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;svm&quot;</span>, <span class="dt">optimizer =</span> <span class="st">&quot;hjn&quot;</span>, <span class="dt">fast =</span> <span class="ot">TRUE</span>, <span class="dt">cross =</span> <span class="ot">NULL</span>)</code></pre></div>
+<p>The arguments are:</p>
+<ul>
+<li>x: matrix or data frame of dependent variables.</li>
+<li>y: numeric vector of responses.</li>
+<li>method: “svm” for SVMs, “ada” for adaboost, and “gbm” for GBMs.</li>
+<li>optimizer: “hjn” for Hooke-Jeeves algorithm or “ga” for genetic algorithm.</li>
+<li>fast: Indicates if the function should use a subset of the observations when optimizing to speed up calculation time. Options include TRUE, a number between 0 and 1, and a positive integer. A value of TRUE will use the smaller of 50% of the data or 200 observations for model fitting. A number between 0 and 1 specifies the proportion of data that will be used to fit the model. A positive integer specifies the number of observations that will be used to fit the model. A model is computed using a random selection of data and the remaining data are used to validate model performance. Validation error rate or MSE is used as the optimization measure.</li>
+<li>cross: If an integer k &gt; 1 is specified, k-fold cross validation is used to fit the model. This parameter is ignored unless fast = FALSE.</li>
+</ul>
+<p>The function determines if a response is binary or continuous and then performs the appropriate grid search based on the function arguments. Testing showed that the SVM model is faster to tune than GBMs and adaboost, with adaboost being substantially slower than either of the other models. Tuning is also very slow as datasets get large. The mullein and lichen datasets included this package tune very slowly because of their size. Testing the package on these datasets indicated that the fast options should be set as the default. If a user wants a more accurate model and is willing to wait for it, they can select cross validation or fit with a larger subset of the data.</p>
+<p>The Hooke-Jeeves optimization algorithm was chosen as the default optimization tool because it is fast and it outperformed all of the other algorithms tested. It did not always produce the best model out of the algorithms, but it was the only algorithm that was always among the best performers. The only other algorithm that consistently produced models with error measures as low, or lower, than those found by the Hooke-Jeeves algorithm were those found by the genetic algorithm. The genetic algorithm was able to find a much better model than Hooke-Jeeves in some situations, so it is included in the package. However, computation time for the genetic algorithm is very slow, particularly for large datasets. If a user is in need of a more accurate model and can wait for a longer computation time, the genetic algorithm is worth trying. However, eztune will typically produce a very good model using the Hooke-Jeeves option with a much faster computation time. The function hjn from the optimx package optimx is used to implement the Hooke-Jeeves algorithm. The package GA is used for genetic algorithm optimization in eztune.</p>
+<p>The fast options were chosen to allow the user to adjust computation time for different dataset sizes. The default setting uses 50% of the data for datasets with less than 400 observations. If the data have more than 400 observations, 200 observations are chosen at random as training data and the remaining data are used for model verification. This options allows for very large datasets to be tuned quickly while ensuring there is a sufficient amount of verification data for smaller datasets. The user can change these setting to meet the needs of their project and accommodate their dataset. For example, 200 observations may not be enough to tune a model for a dataset as large as the mullein dataset. The user can increase that number of observations used to train the model using the fast argument.</p>
+<p>The function returns a model and numerical measures that are associated with the model. The model that is returned is an object from the package used to create the model. The SVM model is of class svm, the GBM model is of class gbm.object, and the adaboost model is of class ada. These models can be used with any of the features and functions available for those objects. The accuracy and MSE is returned as well as the final tuning parameters. The names of the parameters match the names from the function used to generate them. For example, the number of trees used in gbm is called n.trees while the same parameter is called iter for adaboost. This may seem confusing, but it was anticipated that users may want to use the functionality of the e1071, gbm, and ada packages and naming the parameters to match those packages will make moving from EZtune to the other packages easier. If the fast option is used, eztune will return the number of observations used to train the dataset. If cross validation is used, the function will return the number of folds used for cross validation.</p>
+</div>
+</div>
+<div id="eztune_cv" class="section level2">
+<h2>eztune_cv</h2>
+<p>Because eztune has many options for model optimization, a second function is included to assess model performance using cross validation. It is known that model accuracy measures based on resubstitution are overly optimistic. That is, when the data that were used to create the model are used to verify the model, model performance will typically look much better than it actually is. Fast options in eztune use data splitting so that the models are optimized using verification data rather than training data. Because the training dataset may be a small fraction of the original dataset the resulting model may not be as accurate as desired.</p>
+<p>The function eztune_cv was developed to easily verify a model computed by eztune using cross validation so that a better estimate of model accuracy can be quickly obtained. The predictors and response are inputs into the function along with the object obtained from eztune. The eztune_cv function returns a number that represents the cross validated accuracy or MSE. Function syntax is:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">eztune_cv</span>(x, y, model, <span class="dt">cross =</span> <span class="dv">10</span>)</code></pre></div>
+<p>Arguments:</p>
+<ul>
+<li>x: Matrix or data frame of dependent variables.</li>
+<li>y: Numeric vector of responses.</li>
+<li>model: Object generated with the function eztune.</li>
+<li>cross: The number of folds for n-fold cross validation.</li>
+</ul>
+<p>The function returns a numeric value that represents the cross validated accuracy or MSE of the model.</p>
+<p><br /><br /></p>
+</div>
+</div>
+<div id="datasets" class="section level1">
+<h1>Datasets</h1>
+<p>The datasets included in EZtune are the mullein, mullein test, lichen, and lichen test datasets from the article <em>Random Forests for Classification in Ecology</em> (Cutler et al. 2007). Both datasets are large for automatic tuning and were used as part of package development to test performance and computation speed for large datasets. Datasets can be accessed using the following commands:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(lichen)
+<span class="kw">data</span>(lichenTest)
+<span class="kw">data</span>(mullein)
+<span class="kw">data</span>(mulleinTest)</code></pre></div>
+<div id="lichen-data" class="section level2">
+<h2>Lichen Data</h2>
+<p>The lichen data consist of 840 observations and 40 variables. One variable is a location identifier, 7 (coded as 0 and 1) identify the presence or absence of a type of lichen species, and 32 are characteristics of the survey site where the data were collected. Data were collected between 1993 and 1999 as part of the Lichen Air Quality surveys on public lands in Oregon and southern Washington. Observations were obtained from 1-acre (0.4 ha) plots at Current Vegetation Survey (CVS) sites. Indicator variables denote the presences and absences of seven lichen species. Data for each sampled plot include the topographic variables elevation, aspect, and slope; bioclimatic predictors including maximum, minimum, daily, and average temperatures, relative humidity precipitation, evapotranspiration, and vapor pressure; and vegetation variables including the average age of the dominant conifer and percent conifer cover.</p>
+<p>Twelve monthly values were recorded for each of the bioclimatic predictors in the original dataset. Principal components analyses suggested that for each of these predictors two principal components explained the vast majority (95.0%-99.5%) of the total variability. Based on these analyses, indices were created for each set of bioclimatic predictors. These variables were averaged into yearly measurements. Variables within the same season were also combined and the difference between summer and winter averages were recorded to provide summer to winter contrasts. The averages and differences are included in the data in EZtune.</p>
+</div>
+<div id="lichen-test-data" class="section level2">
+<h2>Lichen Test Data</h2>
+<p>The lichen test data consist of 300 observations and 40 variables. Data were collected from half-acre plots at CVS sites in the same geographical region and contain many of the same variables, including presences and absences for the seven lichen species. The 40 variables are the same as those for the lichen data and it is a good test dataset for predictive methods applied to the Lichen Air Quality data.</p>
+</div>
+<div id="mullein-data" class="section level2">
+<h2>Mullein Data</h2>
+<p>The mullein dataset consists of 12,094 observations and 32 variables. It contains information about the presence and absence of common mullein (<em>Verbascum thapsus</em>) at Lava Beds National Monument. The park was digitally divided into 30m <span class="math inline">\(\times\)</span> 30m pixels. Park personnel provided data on 6,047 sites at which mullein was detected and treated between 2000 and 2005, and these data were augmented by 6,047 randomly selected pseudo-absences. Measurements on elevation, aspect, slope, proximity to roads and trails, and interpolated bioclimatic variables such as minimum, maximum, and average temperature, precipitation, relative humidity, and evapotranspiration were recorded for each 30m <span class="math inline">\(\times\)</span> 30m site.</p>
+<p>Twelve monthly values were recorded for each of the bioclimatic predictors in the original dataset. Principal components analyses suggested that for each of these predictors two principal components explained the vast majority (95.0%-99.5%) of the total variability. Based on these analyses, indices were created for each set of bioclimatic predictors). These variables were averaged into yearly measurements. Variables within the same season were also combined and the difference between summer and winter averages were recorded to provide summer to winter contrasts. The averages and differences are included in the data in EZtune.</p>
+</div>
+<div id="mullein-test-data" class="section level2">
+<h2>Mullein Test Data</h2>
+<p>The mullein test data consists of 1512 observations and 32 variables. One variable identifies the presence or absence of mullein in a 30m <span class="math inline">\(\times\)</span> 30m site and 31 variables are characteristics of the site where the data were collected. The data were collected in Lava Beds National Monument in 2006 that can be used to verify evaluate predictive statistical procedures applied to the mullein dataset.</p>
+<p><br /><br /></p>
+</div>
+</div>
+<div id="examples" class="section level1">
+<h1>Examples</h1>
+<p>The following examples demonstrate the functionality of EZtune.</p>
+<div id="examples-with-binary-classifier-as-a-response" class="section level2">
+<h2>Examples with binary classifier as a response</h2>
+<p>The following examples use the Ionosphere dataset from the mlbench package to demonstrate the package. The first variable is excluded because it only takes on a single value. Note that the user does not need to specify the type of the response variable. EZtune will automatically choose the binary response options if the response variable has only two unique values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbench)
+<span class="kw">data</span>(Ionosphere)
+
+y &lt;-<span class="st"> </span>Ionosphere[, <span class="dv">35</span>]
+x &lt;-<span class="st"> </span>Ionosphere[, <span class="op">-</span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">35</span>)]
+<span class="kw">dim</span>(x)
+<span class="co">#&gt; [1] 351  33</span></code></pre></div>
+<p>This example shows the default options for eztune. It will fit an SVM using 50% of the data and the Hooke-Jeeves algorithm. The eztune_cv function returns the cross validated accuracy of the model using 10-fold cross validation. Because the fast argument was used, the <em>n</em> value that is returned indicates the number of observations that were used to train the model. The <em>accuracy</em> value is the best accuracy obtained by the optimization algorithm.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ion_default &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y)
+ion_default<span class="op">$</span>n
+<span class="co">#&gt; [1] 176</span>
+ion_default<span class="op">$</span>accuracy
+<span class="co">#&gt; [1] 0.9657143</span>
+<span class="kw">eztune_cv</span>(x, y, ion_default)
+<span class="co">#&gt; [1] 0.954416</span></code></pre></div>
+<p>This next example tunes an SVM with a Hooke-Jeeves optimization algorithm that is optimized using the accuracy obtained from 3-fold cross validation. Note that eztune will only optimize on a cross validated accuracy of fast=FALSE. The function only returns the nfold object if it cross validation is used.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ion_svm &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y, <span class="dt">fast =</span> <span class="ot">FALSE</span>, <span class="dt">cross =</span> <span class="dv">3</span>)
+ion_svm<span class="op">$</span>nfold
+<span class="co">#&gt; [1] 3</span>
+ion_svm<span class="op">$</span>accuracy
+<span class="co">#&gt; [1] 0.957265</span>
+<span class="kw">eztune_cv</span>(x, y, ion_svm)
+<span class="co">#&gt; [1] 0.9401709</span></code></pre></div>
+<p>The following code tunes a GBM using a genetic algorithm and using only 50 randomly selected observations to train the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ion_gbm &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;gbm&quot;</span>, <span class="dt">optimizer =</span> <span class="st">&quot;ga&quot;</span>, <span class="dt">fast =</span> <span class="dv">50</span>)
+ion_gbm<span class="op">$</span>n
+<span class="co">#&gt; [1] 50</span>
+ion_gbm<span class="op">$</span>accuracy
+<span class="co">#&gt; [1] 0.910299</span>
+<span class="kw">eztune_cv</span>(x, y, ion_gbm)
+<span class="co">#&gt; [1] 0.9316239</span></code></pre></div>
+</div>
+<div id="examples-with-a-continuous-response" class="section level2">
+<h2>Examples with a continuous response</h2>
+<p>The following examples use the BostonHousing2 dataset from the mlbench package to demonstrate the package. The variable medv is excluded because it is an incorrect version of the response. Note that the user does not need to specify the type of the response variable. EZtune will automatically choose the continuous response options if the response variable has more than two unique values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(BostonHousing2)
+
+x &lt;-<span class="st"> </span>BostonHousing2[, <span class="kw">c</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">4</span>, <span class="dv">7</span><span class="op">:</span><span class="dv">19</span>)]
+y &lt;-<span class="st"> </span>BostonHousing2[, <span class="dv">6</span>]
+<span class="kw">dim</span>(x)
+<span class="co">#&gt; [1] 506  17</span></code></pre></div>
+<p>This example shows the default values for eztune with the regression response. It is uses 200 observations to train an SVM because there are more than 400 observations in the BostonHousing2 dataset. The MSE is returned along with the number of observations used to train the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bh_default &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y)
+bh_default<span class="op">$</span>n
+<span class="co">#&gt; [1] 200</span>
+bh_default<span class="op">$</span>mse
+<span class="co">#&gt; [1] 6.574825</span>
+<span class="kw">eztune_cv</span>(x, y, bh_default)
+<span class="co">#&gt; Warning in cret$cresults * scale.factor: Recycling array of length 1 in vector-array arithmetic is deprecated.</span>
+<span class="co">#&gt;   Use c() or as.vector() instead.</span>
+<span class="co">#&gt;          [,1]</span>
+<span class="co">#&gt; [1,] 8.665001</span></code></pre></div>
+<p>This example tunes an SVM using a genetic algorithm and 200 observations.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bh_ga &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y, <span class="dt">optimizer =</span> <span class="st">&quot;ga&quot;</span>)
+bh_ga<span class="op">$</span>n
+<span class="co">#&gt; [1] 200</span>
+bh_ga<span class="op">$</span>mse
+<span class="co">#&gt; [1] 6.556528</span>
+<span class="kw">eztune_cv</span>(x, y, bh_ga)
+<span class="co">#&gt; Warning in cret$cresults * scale.factor: Recycling array of length 1 in vector-array arithmetic is deprecated.</span>
+<span class="co">#&gt;   Use c() or as.vector() instead.</span>
+<span class="co">#&gt;         [,1]</span>
+<span class="co">#&gt; [1,] 7.25992</span></code></pre></div>
+<p>This example tunes a GBM using Hooke-Jeeves and training on 50% of the data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bh_gbm &lt;-<span class="st"> </span><span class="kw">eztune</span>(x, y, <span class="dt">method =</span> <span class="st">&quot;gbm&quot;</span>, <span class="dt">fast =</span> <span class="fl">0.75</span>)
+bh_gbm<span class="op">$</span>n
+<span class="co">#&gt; [1] 380</span>
+bh_gbm<span class="op">$</span>mse
+<span class="co">#&gt; [1] 6.300884</span>
+<span class="kw">eztune_cv</span>(x, y, bh_gbm)
+<span class="co">#&gt; [1] 12.50305</span></code></pre></div>
+<p><br /><br /></p>
+</div>
+</div>
+<div id="performance-and-speed-guidelines" class="section level1">
+<h1>Performance and speed guidelines</h1>
+<p>Performance and speed were tested on seven datasets with a continuous response and six datasets with a binary classifier as a response. The datasets varied in size. The following guidelines and observations were made during the analysis:</p>
+<ul>
+<li>The default fast option produces very good results for most datasets. However, larger datasets, such as the mullein dataset, often need more than 200 observations to get a well tuned model. It is recommended to use at least 50% of the data in these situations if the computation time can be spared.</li>
+<li>The best results are seen with models optimized using 10-fold cross validation. However, computation time is very slow and may be prohibitive for very large datasets.</li>
+<li>The fast options decrease computation time unilaterally and often produce results nearly as good as with 10-fold cross validation.</li>
+<li>Tuning on resubstitution error or MSE is slow and yields poor results. It is recommended to avoid this method.</li>
+<li>SVM has the fastest computation time and adaboost has the slowest computation time.</li>
+<li>Models computed using small datasets (&lt;75 observations) do not yield good results.</li>
+</ul>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

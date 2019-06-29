@@ -1,94 +1,110 @@
-#' Tuning supervised learning models.
-#'
-#' The EZtune package contains two functions and four datasets. The functions
-#' are eztune and eztune.cv. The datasets are lichen, lichenTest, mullein, and
-#' mulleinTest
-#'
-#' @section Eztune functions:
-#' The EZtune functions are eztune and eztune.cv. The function eztune will
-#' autotune an adaboost, gradient boosting machine, and support vector
-#' machine using a genetic algorithm or a quasi-Newton-Raphson optimizer.
-#' The eztune.cv function returns the cross-validated error for an object
-#' produced by eztune.
-#'
-#' @section EZtune datasets:
-#' The lichen dataset has 840 observations and 40 variables. Seven of the
-#' variables are binary response variables. The lichenTest dataset is a test
-#' dataset for the lichen dataset that consists of 300 observations and
-#' the same 40 variables.
-#'
-#' The mullein dataset consists of 12094 observations and 32 variables. One
-#' variable is a binary response. The mulleinTest dataset is a test
-#' dataset for the mullein data that consists of 1512 observations
-#' and the same 32 variables as mullein.
-#'
-"_PACKAGE"
-
 #' Supervised Learning Function
 #'
-#' eztune is a single function that will tune adaboost, support vector
-#' machines, and gradient boosting machines. It currently only
-#' tunes models with a binary response. An optimizer is used to find
-#' a good set of tuning parameters for the selected model. The
-#' function optimizes on either the resubstitution accuracy or the
-#' cross-validated accuracy.
+#' \code{eztune} is a function that automatically tunes adaboost, support vector
+#' machines, and gradient boosting machines. An optimization algorithm is
+#' used to find a good set of tuning parameters for the selected model. The
+#' function optimizes on a validation dataset, the resubstitution accuracy,
+#' or the cross validated accuracy.
 #' @param x Matrix or data frame containing the dependent variables.
-#' @param y Numeric vector of 0s and 1s for the response.
-#' @param type Type of response (binary is the only option at this time).
+#' @param y Vector responses.Can either be a factor or a numeric vector.
 #' @param method Model to be fit. Choices are "ada" for adaboost, "gbm" for
 #'  gradient boosting machines, and "svm" for support vector machines.
 #' @param optimizer Optimization method. Options are "ga" to use a genetic
-#'  algorithm to optimize and "optim" to use a quasi-Newton-Raphson optimizer.
-#' @param cv Indicates if the cross-validation accuracy should be used to fit.
-#'  FALSE to use resubstitution accuracy to optimize (faster but less accurate)
-#'  and TRUE to use cross-validation accuracy (slower and more accurate).
-#' @param fold The number of folds to use for n-fold cross validation. This is
-#'  ignored if cv = FALSE.
-#' @keywords adaboost, svm, gbm, tuning
+#'  algorithm and "hjn" to use a Hooke-Jeeves optimizer.
+#' @param fast Indicates if the function should use a subset of the
+#'  observations when optimizing to speed up calculation time. A value
+#'  of TRUE will use the smaller of 50\% of the data or 200 observations
+#'  for model fitting, a number between 0 and 1 specifies the proportion
+#'  of data that will be used to fit the model, and a postive integer
+#'  specifies the number of observations that will be used to fit the
+#'  model. A model is computed using a random selection of data and
+#'  the remaining data are used to validate model performance.
+#'  Validation accuracy or MSE is used as the optimization measure.
+#' @param cross If an integer k > 1 is specified, k-fold cross-validation
+#'  is used to fit the model. This method is very slow for large datasets.
+#'  This parameter is ignored unless \code{fast = FALSE}.
 #' @return Function returns a summary of the fitted tuning parameters,
-#'  the accuracy, and the best model.
+#'  the accuracy or MSE, and the best model.
 #'
-#' \item{summary}{Matrix that contains the values of the tuning parameters
-#'  and the final accuracy.}
-#' \item{accuracy}{Best accuracy obtained by optimizing algorithm.}
-#' \item{best.model}{Model using optimized parameters. Adaboost model
-#'  comes from package ada, gbm model comes from package gbm, svm
-#'  model comes from package e1071.}
+#' \item{accuracy}{Best accuracy obtained by optimizing algorithm
+#' for classification models.}
+#' \item{mse}{Best mean squared error obtained by optimizing algorithm
+#' for regression models.}
+#' \item{model}{Model using optimized parameters. Adaboost model
+#'  comes from package ada (ada object), gbm model comes from package gbm
+#'  (gbm.object object), svm (svm object) model comes from package e1071.}
+#' \item{n}{Number of observations used in model training when
+#' fast option is used}
+#' \item{nfold}{Number of folds used if cross validation is used
+#' for optimization.}
+#' \item{cost}{Tuning parameter for svm.}
+#' \item{gamma}{Tuning parameter for svm.}
+#' \item{epsilon}{Tuning parameter for svm regression.}
 #' \item{iter}{Tuning parameter for adaboost.}
 #' \item{nu}{Tuning parameter for adaboost.}
-#' \item{loss}{Loss used in adaboost fitting.}
-#' \item{interaction.depth}{Tuning parameter for gbm.}
+#' \item{shrinkage}{Tuning parameter for adaboost and gbm.}
 #' \item{n.trees}{Tuning parameter for gbm.}
-#' \item{shrinkage}{Tuning parameter for gbm.}
-#' \item{cost}{Tuning parameter for svm.}
-#' \item{epsilon}{Tuning parameter for svm.}
-#' \item{kernel}{Kernel used in svm fitting.}
+#' \item{interaction.depth}{Tuning parameter for gbm.}
+#' \item{n.minobsinnode}{Tuning parameter for gbm.}
 #'
 #' @examples
 #' library(mlbench)
-#' data(Glass)
+#' data(Sonar)
+#' sonar <- Sonar[sample(1:nrow(Sonar), 100), ]
 #'
-#' glass <- Glass[as.numeric(as.character(Glass$Type)) < 3, ]
-#' glass <- glass[sample(1:nrow(glass), 80), ]
-#' y <- ifelse(glass$Type == 1, 0, 1)
-#' x <- glass[, 1:9]
+#' y <- sonar[, 61]
+#' x <- sonar[, 1:10]
 #'
-#' eztune(x, y, type = "binary", method = "gbm", optimizer = "optim")
+#' # Optimize an SVM using the default fast setting and Hooke-Jeeves
+#' eztune(x, y)
+#'
+#' # Optimize an SVM with 3-fold cross validation and Hooke-Jeeves
+#' eztune(x, y, fast = FALSE, cross = 3)
+#'
+#' # Optimize GBM using training set of 50 observations and Hooke-Jeeves
+#' eztune(x, y, method = "gbm", fast = 50)
+#'
+#' # Optimize SVM with 25% of the observations as a training dataset
+#' # using a genetic algorithm
+#' eztune(x, y, method = "svm", optimizer = "ga", fast = 0.25)
 #'
 #' @export
 #'
-eztune <- function(x, y, type = "binary", method = "ada",
-                   optimizer = "optim", cv = FALSE, fold = 10) {
+eztune <- function(x, y, method = "svm", optimizer = "hjn", fast = TRUE,
+                   cross = NULL) {
+
+  if(length(unique(y)) == 2) {
+    y <- as.numeric(as.factor(y)) - 1
+    type <- "bin"
+  } else {
+    y <- as.numeric(as.character(y))
+    type <- "reg"
+  }
+
+  if(fast > 1) {
+    fast <- round(fast)
+  }
+
+  if(!is.null(cross)) {
+    cross <- round(cross)
+  }
+
 
   command <- paste(type, method, optimizer, sep = ".")
 
   ezt <- switch(command,
-                binary.ada.ga = ga.ada.b(x, y, cv = cv, fold = fold),
-                binary.ada.optim = opt.ada.b(x, y, cv = cv, fold = fold),
-                binary.gbm.ga = ga.gbm.b(x, y, cv = cv, fold = fold),
-                binary.gbm.optim = opt.gbm.b(x, y, cv = cv, fold = fold),
-                binary.svm.ga = ga.svm.b(x, y, cv = cv, fold = fold),
-                binary.svm.optim = opt.svm.b(x, y, cv = cv, fold = fold))
+                bin.ada.ga = ada.bin.ga(x, y, cross = cross, fast = fast),
+                bin.ada.hjn = ada.bin.hjn(x, y, cross = cross, fast = fast),
+                bin.gbm.ga = gbm.bin.ga(x, y, cross = cross, fast = fast),
+                bin.gbm.hjn = gbm.bin.hjn(x, y, cross = cross, fast = fast),
+                bin.svm.ga = svm.bin.ga(x, y, cross = cross, fast = fast),
+                bin.svm.hjn = svm.bin.hjn(x, y, cross = cross, fast = fast),
+                reg.gbm.ga = gbm.reg.ga(x, y, cross = cross, fast = fast),
+                reg.gbm.hjn = gbm.reg.hjn(x, y, cross = cross, fast = fast),
+                reg.svm.ga = svm.reg.ga(x, y, cross = cross, fast = fast),
+                reg.svm.hjn = svm.reg.hjn(x, y, cross = cross, fast = fast)
+  )
+
 
   ezt
 }
