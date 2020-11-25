@@ -4,7 +4,8 @@
 \name{lichenTest}
 \alias{lichenTest}
 \title{Test dataset for lichen data}
-\format{A data frame with 300 observations and 40 variables. One variable
+\format{
+A data frame with 300 observations and 40 variables. One variable
 is a location identifier, 7 identify the presence or absence of the lichen
 species, and 32 are characteristics of the survey site where the data were
 collected.
@@ -59,7 +60,8 @@ The variables are summarized as follows:
 \item{PctConifCov}{Percent conifer cover}
 \item{PctBroadLeafCov}{Percent broadleaf cover}
 \item{TreeBiomass}{Live tree (> 1inch DBH) biomass, above ground, dry weight.}
-}}
+}
+}
 \source{
 Cutler, D. Richard., Thomas C. Edwards Jr., Karen H. Beard,
 Adele Cutler, Kyle T. Hess, Jacob Gibson, and Joshua J. Lawler. 2007.

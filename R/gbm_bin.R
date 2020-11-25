@@ -3,10 +3,10 @@
 #                           GBM binary hjn function
 #------------------------------------------------------------------------------
 
-gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
+gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast, loss =loss) {
 
   y <- as.numeric(as.factor(y)) - 1
-  dat <- cbind(y, x)
+  dat <- as.data.frame(cbind(y, x))
 
   # initialize list
   results <- list()
@@ -15,22 +15,24 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
   #                           GBM binary resub function
   #------------------------------------------------------------------------------
 
-  gbm.bin.opt.resub <- function(params, dat){
+  gbm.bin.opt.resub <- function(params, dat, loss){
     pr <- NULL
+
     try(pr <- gbm::gbm(y ~ ., distribution = "bernoulli",
                        n.trees = round(params[1]),
                        interaction.depth = round(params[2]),
                        n.minobsinnode = round(params[3]),
                        shrinkage = params[4],
                        data = dat))
-    if(!is.null(pr)){
-      pred <- gbm::predict.gbm(pr, newdata = dat, type="response",
-                               n.trees = round(params[1]))
-      err <- mean(dat[, 1] != round(pred))
+    pred <- gbm::predict.gbm(pr, newdata = dat, type="response",
+                             n.trees = round(params[1]))
+
+    if(is.null(pr)){
+      l <- 1
     } else {
-      err <- 1
+      l <- loss.bin(pred = pred, true_y = dat$y, loss = loss)
     }
-    err
+    1 - l
   }
 
 
@@ -38,9 +40,9 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
   #                           GBM binary CV functions
   #------------------------------------------------------------------------------
 
-  gbm.bin.cv <- function(x, y, cross, tr, id, nmin, shr) {
+  gbm.bin.cv <- function(x, y, cross, tr, id, nmin, shr, loss) {
     dat <- cbind(y, x)
-    yval <- cbind(rep(0, nrow(x)), y)
+    yval <- rep(0, nrow(x))
     xvs <- rep(1:cross, length = nrow(x))
     xvs <- sample(xvs)
     cv.acc <- rep(0, cross)
@@ -50,24 +52,24 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
       gbm.t <- gbm::gbm(y ~ ., distribution = "bernoulli",
                         interaction.depth = id, n.trees = tr,
                         shrinkage = shr, data = train, n.minobsinnode = nmin)
-      yval[xvs == i, 1] <- round(gbm::predict.gbm(gbm.t, newdata = test, type="response",
-                                                  n.trees = tr))
+      yval[xvs == i] <- gbm::predict.gbm(gbm.t, newdata = test, type="response",
+                                         n.trees = tr)
     }
-    err <- mean(round(yval[, 1]) != yval[, 2])
-    err
+    l <- loss.bin(pred = yval, true_y = dat$y, loss = loss)
+    l
   }
 
-  gbm.bin.opt.cv <- function(params, cross, dat) {
+  gbm.bin.opt.cv <- function(params, cross, dat, loss) {
     pr <- NULL
-    try(pr <- gbm.bin.cv(dat[, -1], as.numeric(as.factor(dat[, 1])) - 1,
+    try(pr <- gbm.bin.cv(dat[, -1], dat[, 1],
                          cross = cross, tr = round(params[1]), id = round(params[2]),
-                         nmin = round(params[3]), shr = params[4]))
+                         nmin = round(params[3]), shr = params[4], loss = loss))
     if(!is.null(pr)){
-      err <- pr
+      l <- 1 - pr
     } else {
-      err <- 1
+      l <- 1
     }
-    err
+    l
   }
 
 
@@ -76,35 +78,36 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
   #                           GBM binary fast functions
   #------------------------------------------------------------------------------
 
-  gbm.bin.pred.fast <- function(x, y, n, tr, id, nmin, shr) {
+  gbm.bin.pred.fast <- function(x, y, n, tr, id, nmin, shr, loss) {
     dat <- cbind(y, x)
-    dat <- dat[sample(nrow(dat)), ]
-    train <- dat[c(1:n), ]
-    test <- dat[-c(1:n), ]
+    dat2 <- dat[sample(nrow(dat)), ]
+    train <- dat2[c(1:n), ]
+    test <- dat2[-c(1:n), ]
     gbm.t <- gbm::gbm(y ~ ., distribution = "bernoulli",
                       interaction.depth = id, n.trees = tr,
                       shrinkage = shr, data = train, n.minobsinnode = nmin)
-    pred <- round(gbm::predict.gbm(gbm.t, newdata = test, type="response",
-                                   n.trees = tr))
-    mean(pred != test$y)
+    pred <- gbm::predict.gbm(gbm.t, newdata = test, type="response",
+                             n.trees = tr)
+    l <- loss.bin(pred = pred, true_y = test$y, loss = loss)
+    l
   }
 
-  gbm.bin.opt.fast <- function(params, n, dat){
+  gbm.bin.opt.fast <- function(params, n, dat, loss){
     pr <- NULL
     try(pr <- gbm.bin.pred.fast(dat[, -1], dat[, 1], n = n, tr = round(params[1]),
                                 id = round(params[2]),
-                                nmin = round(params[3]), shr = params[4]))
+                                nmin = round(params[3]), shr = params[4], loss = loss))
     if(!is.null(pr)){
-      err <- pr
+      l <- 1 - pr
     } else {
-      err <- 1
+      l <- 1
     }
-    err
+    l
   }
 
   # setup fitness function based on user inputs
   if(is.null(cross) & !fast) {
-    fit <- function(x) {gbm.bin.opt.resub(x, dat)}
+    fit <- function(x) {gbm.bin.opt.resub(x, dat, loss)}
   } else if (fast > 0) {
     if(fast > 1) {
       n <- fast
@@ -113,11 +116,11 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
     } else {
       n <- find.n(dat, fast)
     }
-    fit <- function(x) {gbm.bin.opt.fast(x, n, dat)}
+    fit <- function(x) {gbm.bin.opt.fast(x, n, dat, loss)}
     results$n <- n
   } else if(!is.null(cross)) {
     if(cross >= 2) {
-      fit <- function(x) {gbm.bin.opt.cv(x, cross, dat)}
+      fit <- function(x) {gbm.bin.opt.cv(x, cross, dat, loss)}
     } else {
       stop("Invalid number of folds for cross-validation. Use integer > 1.")
     }
@@ -126,7 +129,7 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
   } else {
     warning("Invalid option for fast. Default for fast used in computations.")
     n <- find.n(dat, fast)
-    fit <- function(x) {gbm.bin.opt.fast(x, n, dat)}
+    fit <- function(x) {gbm.bin.opt.fast(x, n, dat, loss)}
     results$n <- n
   }
 
@@ -138,7 +141,7 @@ gbm.bin.hjn <- function(x = x, y = y, cross = cross, fast = fast) {
   results$interaction.depth <- as.integer(round(hjn.obj$par[2]))
   results$n.minobsinnode <- as.integer(round(hjn.obj$par[3]))
   results$shrinkage <- as.numeric(hjn.obj$par[4])
-  results$accuracy <- as.numeric(1 - hjn.obj$value)
+  results$loss <- as.numeric(1.0 - hjn.obj$value)
   results$model <- gbm::gbm(y ~ ., distribution = "bernoulli", data = dat,
                             n.trees = results$n.trees,
                             interaction.depth = results$interaction.depth,

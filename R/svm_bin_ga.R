@@ -1,26 +1,35 @@
+
 #------------------------------------------------------------------------------
 #                           SVM binary ga function
 #------------------------------------------------------------------------------
 
-svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
+svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE, loss = loss) {
 
-  dat <- cbind(y, x)
+  dat <- as.data.frame(cbind(y, x))
 
   #------------------------------------------------------------------------------
   #                           SVM binary CV function
   #------------------------------------------------------------------------------
 
-  svm.bin.opt.cv <- function(params, cross) {
+  svm.bin.opt.cv <- function(params, cross, loss) {
     dat <- dat
-    pr <- NULL
-    try(pr <- e1071::svm(as.factor(y) ~ ., data = dat, cost = params[1],
-                         gamma = 2^params[2], cross = cross))
-    if(!is.null(pr)){
-      acc <- pr$tot.accuracy
+
+    if(loss == "class") {
+      pr <- NULL
+      try(pr <- e1071::svm(as.factor(y) ~ ., data = dat, cost = params[1],
+                           gamma = 2^params[2], cross = cross, fitted = TRUE))
+      l <- 0.01 * pr$tot.accuracy
+    } else if (loss == "auc") {
+      pr <- NULL
+      try(pr <- cv.pred.svm(dat, params, cross))
+      l <- loss.bin(pred = pr, true_y = dat$y, loss = "auc")
     } else {
-      acc <- 0
+      stop("invalid optimization criterion - choose 'default', 'class', or 'auc' for loss")
     }
-    1 - 0.01 * acc
+
+    if(is.null(pr)) l <- 0
+
+    l
   }
 
 
@@ -30,24 +39,26 @@ svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
 
   svm.bin.pred.fast <- function(x, y, n, cost, gamma) {
     dat <- cbind(y, x)
-    dat <- dat[sample(nrow(dat)), ]
-    train <- dat[c(1:n), ]
-    test <- dat[-c(1:n), ]
-    svm.t <- e1071::svm(as.factor(y) ~ ., data = train, cost = cost, gamma = gamma)
-    pred <- stats::predict(svm.t, newdata = test[, -1])
-    mean(pred != test$y)
+    dat2 <- dat[sample(nrow(dat)), ]
+    train <- dat2[c(1:n), ]
+    test <- dat2[-c(1:n), ]
+    svm.t <- e1071::svm(as.factor(y) ~ ., data = train, cost = cost,
+                        gamma = gamma, probability = TRUE)
+    pr <- stats::predict(svm.t, newdata = test, probability = TRUE)
+    pred <- attr(pr, "probabilities")[, colnames(attr(pr, "probabilities")) == "1"]
+    data.frame(cbind(pred, y = test$y))
   }
 
-  svm.bin.opt.fast <- function(params, n){
+  svm.bin.opt.fast <- function(dat = dat, params = params, n = n, loss = loss) {
     pr <- NULL
     try(pr <- svm.bin.pred.fast(dat[, -1], dat[, 1], n = n, cost = params[1],
                                 gamma = 2^params[2]))
-    if(!is.null(pr)){
-      err <- pr
+    if(!is.null(pr)) {
+      l <- loss.bin(pred = pr$pred, true_y = pr$y, loss = loss)
     } else {
-      err <- 1
+      l <- 0
     }
-    err
+    l
   }
 
 
@@ -56,22 +67,25 @@ svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
   #------------------------------------------------------------------------------
 
   # Function for regular speed
-  svm.bin.opt.resub <- function(params){
+  svm.bin.opt.resub <- function(params, loss){
     pr <- NULL
-    try(pr <- e1071::svm(as.factor(y) ~ ., data = dat, cost = params[1], gamma = 2^params[2]))
+    try(pr <- e1071::svm(as.factor(y) ~ ., data = dat, cost = params[1],
+                         gamma = 2^params[2], probability = TRUE))
     if(!is.null(pr)){
-      err <- mean(dat[, 1] != pr$fitted)
+      pr1 <- stats::predict(pr, newdata = dat, probability = TRUE)
+      pred <- attr(pr1, "probabilities")[, 1]
+      l <- loss.bin(pred = pred, true_y = dat$y, loss = loss)
     } else {
-      err <- 1
+      l <- 0
     }
-    err
+    l
   }
   # initialize list
   results <- list()
 
   # setup fitness function based on user inputs
   if(is.null(cross) & !fast) {
-    fit <- function(x) {1 - svm.bin.opt.resub(x)}
+    fit <- function(x) {svm.bin.opt.resub(x, loss)}
   } else if (fast > 0) {
     if(fast > 1) {
       n <- fast
@@ -80,11 +94,11 @@ svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
     } else {
       n <- find.n(dat, fast)
     }
-    fit <- function(x) {1 - svm.bin.opt.fast(x, n)}
+    fit <- function(x) {svm.bin.opt.fast(dat, x, n, loss)}
     results$n <- n
   } else if(!is.null(cross)) {
     if(cross >= 2) {
-      fit <- function(x) {1 - svm.bin.opt.cv(x, cross)}
+      fit <- function(x) {svm.bin.opt.cv(x, cross, loss)}
     } else {
       stop("Invalid number of folds for cross-validation. Use integer > 1.")
     }
@@ -92,7 +106,7 @@ svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
   } else {
     warning("Invalid option for fast. Default for fast used in computations.")
     n <- find.n(dat, fast)
-    fit <- function(x) {1 - svm.bin.opt.fast(x, n)}
+    fit <- function(x) {svm.bin.opt.fast(dat, x, n, loss)}
     results$n <- n
   }
 
@@ -101,7 +115,7 @@ svm.bin.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
 
   results$cost <- as.numeric(ga.obj@solution[1, 1])
   results$gamma <- as.numeric(2^ga.obj@solution[1, 2])
-  results$accuracy <- as.numeric(ga.obj@fitnessValue)
+  results$loss <- as.numeric(ga.obj@fitnessValue)
   results$model <- e1071::svm(as.factor(y) ~ ., data = dat,
                               cost = results$cost, gamma = results$gamma)
 

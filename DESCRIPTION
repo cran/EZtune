@@ -1,8 +1,8 @@
 Package: EZtune
 Type: Package
-Title: Tunes AdaBoost, Support Vector Machines, and Gradient Boosting
-        Machines
-Version: 2.0.0
+Title: Tunes AdaBoost, Elastic Net, Support Vector Machines, and
+        Gradient Boosting Machines
+Version: 3.0.0
 Authors@R: person("Jill", "Lundell", email = "jflundell@gmail.com",
   role = c("aut", "cre"))
 Maintainer: Jill Lundell <jflundell@gmail.com>
@@ -17,15 +17,15 @@ Description: Contains two functions that are intended to make
     resubstitution or validation data are used for optimization because 
     error measures from both approaches can be misleading.
 Depends: R (>= 3.1.0)
-Imports: ada, e1071, GA, gbm, optimx, rpart
+Imports: ada, e1071, GA, gbm, optimx, rpart, glmnet, ROCR
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.1
 Suggests: knitr, rmarkdown, mlbench, doParallel, parallel
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2019-06-28 22:41:02 UTC; jflun
+Packaged: 2020-11-25 22:42:45 UTC; jflun
 Author: Jill Lundell [aut, cre]
 Repository: CRAN
-Date/Publication: 2019-06-29 04:20:03 UTC
+Date/Publication: 2020-11-25 23:10:03 UTC

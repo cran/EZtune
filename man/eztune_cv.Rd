@@ -19,16 +19,23 @@ numeric or a factor.}
 }
 \value{
 Function returns a numeric value that represents the
-cross-validated accuracy of the model.
+cross-validated accuracy of the model. Both classification accuracy
+and the AUC are returned for models with a binary response. MSE and
+mean absolute error (MAE) are returned for models with a continuous
+response.
+\item{accuracy}{Cross-validated classification accuracy.}
+\item{auc}{Cross-validated AUC.}
+\item{mse}{Cross-validated MSE.}
+\item{mae}{Cross-validated MAE.}
 }
 \description{
 \code{eztune_cv} returns the cross-validated
-accuracy for a model returned by \code{eztune}.
+loss measures for a model returned by \code{eztune}.
 The function \code{eztune} can tune a model using validation data,
 resubstitution or cross validation. If resubstitution or a fast method
 is used to tune the model, the accuracy obtained from the function
-may not be accurate. The function
-\code{eztune_cv} will return a cross-validated accuracy for such a model.
+may not be accurate. The function \code{eztune_cv} will return
+cross-validated accuracy measures for any model returned by \code{eztune}.
 }
 \examples{
 library(mlbench)

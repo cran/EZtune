@@ -3,9 +3,9 @@
 #                           GBM regression ga function
 #------------------------------------------------------------------------------
 
-gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
+gbm.reg.ga <- function(x = x, y = y, cross = cross, fast = fast, loss = loss) {
 
-  dat <- cbind(y, x)
+  dat <- as.data.frame(cbind(y, x))
 
   # initialize list
   results <- list()
@@ -15,7 +15,7 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
   #------------------------------------------------------------------------------
 
   # Function for regular speed
-  gbm.reg.opt.resub <- function(params){
+  gbm.reg.opt.resub <- function(params, dat, loss){
     pr <- NULL
     try(pr <- gbm::gbm(y ~ ., distribution = "gaussian",
                        n.trees = round(params[1]),
@@ -26,11 +26,11 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
     if(!is.null(pr)){
       pred <- gbm::predict.gbm(pr, newdata = dat, type = "response",
                                n.trees = round(params[1]))
-      mse <- mean((dat[, 1] - pred)^2)
+      l <- loss.reg(pred = pred, true_y = dat$y, loss = loss)
     } else {
-      mse <- 1e+150
+      l <- 1e+150
     }
-    mse
+    l
   }
 
 
@@ -38,9 +38,9 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
   #                           GBM regression CV function
   #------------------------------------------------------------------------------
 
-  gbm.reg.cv <- function(x, y, cross, tr, id, nmin, shr) {
+  gbm.reg.cv <- function(x, y, cross, tr, id, nmin, shr, loss) {
     dat <- cbind(y, x)
-    yval <- cbind(rep(0, nrow(x)), y)
+    yval <- rep(0, nrow(x))
     xvs <- rep(1:cross, length = nrow(x))
     xvs <- sample(xvs)
     cv.acc <- rep(0, cross)
@@ -50,62 +50,61 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
       gbm.t <- gbm::gbm(y ~ ., distribution = "gaussian",
                         n.trees = tr, interaction.depth = id,
                         n.minobsinnode = nmin, shrinkage = shr, data = train)
-      yval[xvs == i, 1] <- gbm::predict.gbm(gbm.t, newdata = test, type="response",
-                                            n.trees = round(tr))
+      yval[xvs == i] <- gbm::predict.gbm(gbm.t, newdata = test, type="response",
+                                         n.trees = round(tr))
     }
-    mse <- mean((yval[, 1] - yval[, 2])^2)
-    mse
+    l <- loss.reg(pred = yval, true_y = dat$y, loss = loss)
+    l
   }
 
-  gbm.reg.opt.cv <- function(params, cross) {
+  gbm.reg.opt.cv <- function(params, dat, cross, loss) {
     pr <- NULL
     try(pr <- gbm.reg.cv(dat[, -1], dat[, 1],
                          cross = cross, tr = round(params[1]),
                          id = round(params[2]), nmin = round(params[3]),
-                         shr = params[4]))
+                         shr = params[4], loss = loss))
     if(!is.null(pr)){
-      mse <- pr
+      l <- pr
     } else {
-      mse <- 1e+150
+      l <- 1e+150
     }
-    mse
+    l
   }
-
 
 
   #------------------------------------------------------------------------------
   #                           GBM regression fast functions
   #------------------------------------------------------------------------------
 
-  gbm.reg.pred.fast <- function(x, y, n, tr, id, nmin, shr) {
+  gbm.reg.pred.fast <- function(x, y, n, tr, id, nmin, shr, loss) {
     dat <- cbind(y, x)
-    dat <- dat[sample(nrow(dat)), ]
-    train <- dat[c(1:n), ]
-    test <- dat[-c(1:n), ]
+    dat2 <- dat[sample(nrow(dat)), ]
+    train <- dat2[c(1:n), ]
+    test <- dat2[-c(1:n), ]
     gbm.t <- gbm::gbm(y ~ ., distribution = "gaussian",
                       n.trees = tr, interaction.depth = id,
                       n.minobsinnode = nmin, shrinkage = shr, data = train)
     pred <- stats::predict(gbm.t, newdata = test, type="response",
                            n.trees = round(tr))
-    mean((test$y - pred)^2)
+    loss.reg(pred = pred, true_y = test$y, loss = loss)
   }
 
-  gbm.reg.opt.fast <- function(params, n){
+  gbm.reg.opt.fast <- function(params, dat, n, loss){
     pr <- NULL
     try(pr <- gbm.reg.pred.fast(dat[, -1], dat[, 1], n = n, tr = round(params[1]),
                                 id = round(params[2]), nmin = round(params[3]),
-                                shr = params[4]))
+                                shr = params[4], loss))
     if(!is.null(pr)){
-      mse <- pr
+      l <- pr
     } else {
-      mse <- 1e+150
+      l <- 1e+150
     }
-    mse
+    l
   }
 
   # setup fitness function based on user inputs
   if(is.null(cross) & !fast) {
-    fit <- function(x) {-1 * gbm.reg.opt.resub(x)}
+    fit <- function(x) {-1 * gbm.reg.opt.resub(x, dat, loss)}
   } else if (fast > 0) {
     if(fast > 1) {
       n <- fast
@@ -114,11 +113,11 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
     } else {
       n <- find.n(dat, fast)
     }
-    fit <- function(x) {-1 * gbm.reg.opt.fast(x, n)}
+    fit <- function(x) {-1 * gbm.reg.opt.fast(x, dat, n, loss)}
     results$n <- n
   } else if(!is.null(cross)) {
     if(cross >= 2) {
-      fit <- function(x) {-1 * gbm.reg.opt.cv(x, cross)}
+      fit <- function(x) {-1 * gbm.reg.opt.cv(x, dat, cross, loss)}
     } else {
       stop("Invalid number of folds for cross-validation. Use integer > 1.")
     }
@@ -139,7 +138,7 @@ gbm.reg.ga <- function(x = x, y = y, cross = NULL, fast = FALSE) {
   results$interaction.depth <- as.integer(round(ga.obj@solution[1, 2]))
   results$n.minobsinnode <- as.integer(round(ga.obj@solution[1, 3]))
   results$shrinkage <- as.numeric(ga.obj@solution[1, 4])
-  results$mse <- as.numeric(-1 * ga.obj@fitnessValue)
+  results$loss <- as.numeric(-1 * ga.obj@fitnessValue)
   results$model <- gbm::gbm(y ~ ., distribution = "gaussian", data = dat,
                             n.trees = results$n.trees,
                             interaction.depth = results$interaction.depth,

@@ -4,7 +4,8 @@
 \name{mulleinTest}
 \alias{mulleinTest}
 \title{Mullein data from Lava Beds National Monument - test dataset}
-\format{A data frame with 1512 observations and 32 variables. One variable
+\format{
+A data frame with 1512 observations and 32 variables. One variable
 identifies the presence or absence of mullein in a 30m by 30m site
 and 31 variables are characteristics of the site where the data were
 collected.
@@ -54,7 +55,8 @@ The variables are summarized as follows:
 \item{DistRoad}{Distance to the nearest road in meters}
 \item{DistTrail}{Distance to the nearest trail in meters}
 \item{DistRoadTrail}{Distance to the nearest road or trail in meters}
-}}
+}
+}
 \source{
 Cutler, D. Richard., Thomas C. Edwards Jr., Karen H. Beard,
 Adele Cutler, Kyle T. Hess, Jacob Gibson, and Joshua J. Lawler. 2007.
